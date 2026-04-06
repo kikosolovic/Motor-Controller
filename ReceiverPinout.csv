@@ -1,0 +1,19 @@
+Peripheral,Pin,Arduino Nano Pin,Notes
+ESC,Signal,D3,PWM capable
+Servo,Signal,D2,
+nRF24L01,VCC,3.3V,Use 3.3V (not 5V!)
+nRF24L01,GND,GND,
+nRF24L01,CE,D9,Chip Enable (code-defined)
+nRF24L01,CSN,D10,"Chip Select (SPI SS, code-defined)"
+nRF24L01,SCK,D13,SPI Clock
+nRF24L01,MOSI,D11,SPI Master Out Slave In
+nRF24L01,MISO,D12,SPI Master In Slave Out
+nRF24L01,IRQ,(NC),Not connected/optional
+GY-271,VCC,5V,
+GY-271,GND,GND,
+GY-271,SDA,A4,I2C SDA
+GY-271,SCL,A5,I2C SCL
+NEO-6M,VCC,5V
+NEO-6M,GND,GND
+NEO-6M,TX,D4,SoftwareSerial RX
+NEO-6M,RX,D5,SoftwareSerial TX
