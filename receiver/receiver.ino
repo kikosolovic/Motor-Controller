@@ -33,7 +33,68 @@ bool settings = false;
 
 void loop() {
 
-  getRadioData(); //saved in data.
+  if (!getRadioData()){
+    wdt_reset();
+    return;};
+//1 joy
+//2 watch
+//3 steer
+  switch (packet.header.controllerID) {
+    case 1: {
+      if (packet.header.dataLen == sizeof(joyData)) {
+        joyData data;
+        memcpy(&data, packet.payload, sizeof(data));
+        joystickControllerProcedure(data);
+      }
+      break;
+      }
+       case 2: {
+      if (packet.header.dataLen == sizeof(watchData)) {
+        watchData data;
+        memcpy(&data, packet.payload, sizeof(data));
+        watchControllerProcedure(data);
+      }
+      break;
+      }
+          case 3: {
+      if (packet.header.dataLen == sizeof(steerData)) {
+        steerData data;
+        memcpy(&data, packet.payload, sizeof(data));
+        steerControllerProcedure(data);
+      }
+      break;
+      }
+    }
+
+
+  
+  
+wdt_reset();
+}
+
+
+
+
+
+
+
+
+
+
+//----------------------------------------------------------- procedures
+
+
+
+
+
+
+
+
+
+
+void joystickControllerProcedure(joyData data){
+//      Serial.println(String(data.x) + "-x " + String(data.y) + "-y /toggle -" + String(data.sw)+ "/// pot  "+ String(data.pot) + "key: " + String(data.key));
+    
   if (data.key){
 
   switch (data.key){
@@ -121,6 +182,46 @@ if (joystickThrustMode){
 
 
 data.key = 0;
-data.sw =0;
-wdt_reset();
-}
+data.sw =0;}
+
+void watchControllerProcedure(watchData data){
+//        Serial.println(String(data.btn1) + " -btn1 " + String(data.btn2) + " -btn2 " + String(data.btn3) + " -btn3 ");
+
+        if (data.btn1){ // left
+          continuousTurn(300);
+          }
+        else if (data.btn2) { //right
+          continuousTurn(800);
+          } 
+        if (data.btn3) { // turn on engine
+          if (!motorOn){
+            throttle(200);
+            motorOn = true;
+            }
+           else{
+            throttle(0);
+            motorOn = false;}
+          }
+
+        if (data.btn1 == 0 and data.btn2 == 0 and data.btn3 == 0){
+            continuousTurn(503);
+          }
+
+        
+  }
+void steerControllerProcedure(steerData data){
+//        Serial.println(String(data.throttle) + "-throttle " + String(data.steerAngle) + "-s angle "  + String(data.btn1) + "-btn1 "  + String(data.btn2) + "-btn2 "  + String(data.btn3) + "-btn3 " );
+
+
+          turn(map(data.steerAngle,0,1023,705, 2347.5));
+          throttle(data.throttle);
+
+
+          if (data.btn1){ //CLock
+            }
+          if (data.btn2){} // throttle reverse on
+          if (data.btn3){} //
+        
+
+        
+  }

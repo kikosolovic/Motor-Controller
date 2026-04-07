@@ -8,5 +8,6 @@ void throttleJoy(int x);
 void initFan();
 void toggleFan();
 bool offfan = true;
+bool motorOn = false;
 
 #endif

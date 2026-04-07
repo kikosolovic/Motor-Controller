@@ -24,6 +24,20 @@ struct joyData
     
 };
 
+struct PacketHeader 
+{
+  uint8_t controllerID;
+  uint8_t dataLen;
+  };
+
+struct Packet
+{
+  PacketHeader header;
+  uint8_t payload[24];
+  };
+
+
+Packet packet;
 joyData data;
 joyData last_data;
 
@@ -113,16 +127,25 @@ if (abs(data.x - last_data.x) <= sens) data.x = last_data.x;
 if (abs(data.y - last_data.y) <= sens) data.y = last_data.y;
 if (abs(data.pot - last_data.pot) <= sens) data.pot = last_data.pot;
 
+
   if (memcmp(&data, &last_data, sizeof(joyData)) != 0) {
-radio.write(&data, sizeof(data));
+
+    
+packet.header.controllerID = 1;
+packet.header.dataLen = sizeof(joyData);
+
+  memset(packet.payload, 0, sizeof(packet.payload));
+  memcpy(packet.payload, &data, sizeof(data));
+
+radio.write(&packet, sizeof(packet));
 
     
 
-    Serial.println(data.key );
-    Serial.println(data.y);
-    Serial.println(data.x);
-    Serial.println(data.pot);
-    Serial.println(data.sw);
+//    Serial.println(data.key );
+//    Serial.println(data.y);
+//    Serial.println(data.x);
+//    Serial.println(data.pot);
+//    Serial.println(data.sw);
     
     data.key = 0;
     last_data = data;

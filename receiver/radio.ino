@@ -16,9 +16,9 @@ void initRadio(){
   radio.startListening();
 }
 
-void getRadioData(){
+bool getRadioData(){
     if (radio.available()) {
-    radio.read(&data, sizeof(data));
-//    Serial.println(String(data.x) + "-x " + String(data.y) + "-y /toggle -" + String(data.sw)+ "/// pot  "+ String(data.pot) + "key: " + String(data.key));
-    
-  }}
+    radio.read(&packet, sizeof(packet));
+    return true;
+  }
+  return false;}

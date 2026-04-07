@@ -6,47 +6,64 @@
 #define CSN_PIN 10
 
 RF24 radio(CE_PIN, CSN_PIN);
-const byte address[6] = "NODE1";
+const byte address[6] = "00001";
 
-struct Payload {
-  unsigned long counter;
-  int value;
-};
+const int BTN1_PIN = 3;
+const int BTN2_PIN = 4;
+const int BTN3_PIN = 2;   // D1
 
-Payload data;
-unsigned long lastSend = 0;
+struct watchData
+{
+  uint8_t btn1 = 0;
+  uint8_t btn2 = 0;
+  uint8_t btn3 = 0;
+  };
+  struct PacketHeader 
+{
+  uint8_t controllerID;
+  uint8_t dataLen;
+  };
 
+struct Packet
+{
+  PacketHeader header;
+  uint8_t payload[24];
+  };
+
+Packet packet;
+watchData data;
+watchData last_data;
 void setup() {
   Serial.begin(9600);
-
-  if (!radio.begin()) {
-    Serial.println("nRF24 not responding");
-    while (1) {}
-  }
-
-  radio.setDataRate(RF24_250KBPS);
-  radio.setPALevel(RF24_PA_LOW);
-  radio.setRetries(5, 15);
+  radio.begin();
   radio.openWritingPipe(address);
+  radio.setPALevel(RF24_PA_MIN);
   radio.stopListening();
 
-  Serial.println("TX started");
+  if (BTN1_PIN != -1) pinMode(BTN1_PIN, INPUT_PULLUP);
+  if (BTN2_PIN != -1) pinMode(BTN2_PIN, INPUT_PULLUP);
+  if (BTN3_PIN != -1) pinMode(BTN3_PIN, INPUT_PULLUP);
+Serial.println("started");
 }
+
 
 void loop() {
-  if (millis() - lastSend >= 1000) {
-    lastSend = millis();
 
-    data.counter++;
-    data.value = (digitalRead(2)==LOW ? 0 : 1);
+    data.btn1 = (digitalRead(BTN1_PIN)==LOW ? 1 : 0);
+    data.btn2 = (digitalRead(BTN2_PIN)==LOW ? 1 : 0);
+    data.btn3 = (digitalRead(BTN3_PIN)==LOW ? 1 : 0);
 
-    bool ok = radio.write(&data, sizeof(data));
+  if (memcmp(&data, &last_data, sizeof(watchData)) != 0) {
+    packet.header.controllerID = 2;
+    packet.header.dataLen = sizeof(watchData);
 
-    Serial.print("Sent counter=");
-    Serial.print(data.counter);
-    Serial.print(" value=");
-    Serial.print(data.value);
-    Serial.print(" result=");
-    Serial.println(ok ? "OK" : "FAIL");
+    
+      memset(packet.payload, 0, sizeof(packet.payload));
+  memcpy(packet.payload, &data, sizeof(data));
+radio.write(&packet, sizeof(packet));
+
+    }
+    last_data = data;
+
+
   }
-}

@@ -4,8 +4,25 @@
 #include "Arduino.h"
 
 void initRadio();
-void getRadioData();
+bool getRadioData();
 
+struct steerData
+{
+  uint16_t throttle;
+  uint16_t steerAngle;
+
+  uint8_t btn1;
+  uint8_t btn2;
+  uint8_t btn3;
+  };
+
+struct watchData
+{
+  uint8_t btn1;
+  uint8_t btn2;
+  uint8_t btn3;
+  };
+  
 struct joyData
 {
     int x = 503;
@@ -15,6 +32,18 @@ struct joyData
     char key=0;
 };
 
-joyData data;
+struct PacketHeader 
+{
+  uint8_t controllerID;
+  uint8_t dataLen;
+  };
 
+struct Packet
+{
+  PacketHeader header;
+  uint8_t payload[24];
+  };
+
+Packet packet;
+  
 #endif
