@@ -58,6 +58,18 @@ radio.begin();
 
 }
 
+char readSingleButton(int buttonPin) {
+  if (digitalRead(buttonPin) == LOW) {  // active-low with pull-up
+    delay(20);                          // debounce
+    if (digitalRead(buttonPin) == LOW) {
+      while (digitalRead(buttonPin) == LOW) {
+        delay(5);                       // wait for release
+      }
+      return 1;                       // or whatever character
+    }
+  }
+  return 0;  // no press
+}
 void sendData(){
       packet.header.controllerID = 3;
     packet.header.dataLen = sizeof(steerData);
@@ -70,22 +82,23 @@ void sendData(){
   }
 
 void loop() {
-data.btn1 = (digitalRead(btn1) == LOW ? 1 : 0);
-data.btn2 = (digitalRead(btn2) == LOW ? 1 : 0);
-data.btn3 = (digitalRead(btn3) == LOW ? 1 : 0);
+data.btn1 = readSingleButton(btn1);
+data.btn2 = readSingleButton(btn2);
+data.btn3 = readSingleButton(btn3);
 data.throttle = constrain(map(analogRead(throttlePin),400, 800, 1023,0),0,1023);
 data.steerAngle = constrain(map(analogRead(steerPin),0,1023,1023,0),0,1023);
 
 
-if(data.btn1 == 1){
 
-  transmit = true;}
 if (data.btn3 == 1){
-  if (transmit){
-    
-    sendData(); 
-    }
-  transmit = false;}
+  transmit = !transmit;
+
+    if (!transmit){
+      sendData();} 
+    else{
+      data.btn3 =2;}
+
+}
 
 
 
@@ -97,7 +110,7 @@ if (transmit){
   if (memcmp(&data, &last_data, sizeof(steerData)) != 0)  {
 
     
-sendData();
+    sendData();
     
 
 //    Serial.println(data.btn1 );

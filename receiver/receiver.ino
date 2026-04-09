@@ -247,17 +247,21 @@ void steerControllerProcedure(){
 
 
           if (data_steer.btn1){ //CLock
-            CLEnabled = false;
+
             }
           if (data_steer.btn2){
             steerReverseEnabled = !steerReverseEnabled;
             } // throttle reverse on
 
-          if (data_steer.btn3){
+          if (data_steer.btn3 == 1){
             CLEnabled = true;
-            continuousTurn(503);
+           continuousTurn(503);
+           
+           }
+           else if (data_steer.btn3 == 2){
+            CLEnabled= false;}
             
-            } //
+
 
             
           if (steerReverseEnabled){
