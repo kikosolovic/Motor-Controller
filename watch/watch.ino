@@ -49,7 +49,7 @@ Serial.println("started");
 
 void loop() {
 
-    data.btn1 = (digitalRead(BTN1_PIN)==LOW ? 1 : 0);
+    data.btn1 = readSingleButton(BTN1_PIN);
     data.btn2 = (digitalRead(BTN2_PIN)==LOW ? 1 : 0);
     data.btn3 = (digitalRead(BTN3_PIN)==LOW ? 1 : 0);
 
@@ -66,4 +66,18 @@ radio.write(&packet, sizeof(packet));
     last_data = data;
 
 
+  }
+
+
+char readSingleButton(int buttonPin) {
+    if (digitalRead(buttonPin) == LOW) {  
+      delay(20);                          
+      if (digitalRead(buttonPin) == LOW) {
+        while (digitalRead(buttonPin) == LOW) {
+          delay(5);                      
+        }
+        return 1;                       
+      }
+    }
+  return 0;  
   }

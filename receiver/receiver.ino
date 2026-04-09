@@ -214,10 +214,19 @@ if (joystickThrustMode){
 data_joy.key = 0;
 data_joy.sw = 0;}
 
+
+uint8_t watchSpeed = 200;
 void watchControllerProcedure(){
 //        Serial.println(String(data_watch.btn1) + " -btn1 " + String(data_watch.btn2) + " -btn2 " + String(data_watch.btn3) + " -btn3 ");
 
-        if (data_watch.btn1){ // left
+        if (data_watch.btn3 and data_watch.btn2){
+          watchSpeed = 100;
+          throttle(watchSpeed);}
+        else if (data_watch.btn3 and data_watch.btn1){
+          watchSpeed = 200;
+          throttle(watchSpeed);}
+
+        else if (data_watch.btn1){ // left
           continuousTurn(397);
           }
         else if (data_watch.btn2) { //right
@@ -230,7 +239,7 @@ void watchControllerProcedure(){
 
         if (data_watch.btn3){
           motorOn = !motorOn;
-          throttle(motorOn ? 200 : 0);
+          throttle(motorOn ? watchSpeed : 0);
           data_watch.btn3 = 0;}
 
 

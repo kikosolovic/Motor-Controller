@@ -59,16 +59,16 @@ radio.begin();
 }
 
 char readSingleButton(int buttonPin) {
-  if (digitalRead(buttonPin) == LOW) {  // active-low with pull-up
-    delay(20);                          // debounce
+  if (digitalRead(buttonPin) == LOW) {  
+    delay(20);                          
     if (digitalRead(buttonPin) == LOW) {
       while (digitalRead(buttonPin) == LOW) {
-        delay(5);                       // wait for release
+        delay(5);                      
       }
-      return 1;                       // or whatever character
+      return 1;                       
     }
   }
-  return 0;  // no press
+  return 0;  
 }
 void sendData(){
       packet.header.controllerID = 3;
