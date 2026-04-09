@@ -66,6 +66,19 @@ else{
   
   esc.writeMicroseconds(speed);
   }
+void reverseThrottle(int x){
+      int speed;
+     speed = map(x,0,1022, 1000, 1900);
+     if (speed < 1550 and speed > 1450){
+      speed = 1500;}
+
+if (speed > 1700){
+  fanOn();}
+else{
+  fanOff();}
+  
+  esc.writeMicroseconds(speed);
+  }
 void initFan(){
   
 pinMode(fanPin, OUTPUT);

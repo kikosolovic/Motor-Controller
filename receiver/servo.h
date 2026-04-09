@@ -15,7 +15,7 @@ int degPerTurn = 5;
 void center();
 
 bool CLEnabled = false;
- unsigned long lastServoTurn = 0;
+unsigned long lastServoTurn = 0;
 int servoInterval = 5;
 int compassInterval = 100;
 void angleTest(int x);

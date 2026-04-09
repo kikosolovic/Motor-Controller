@@ -11,8 +11,10 @@
 
 
 void setup() {
+
     wdt_disable(); 
   Serial.begin(9600);
+
   initQMC5883P();
     initServo();
   initRadio();
@@ -21,7 +23,8 @@ void setup() {
 
 
   wdt_enable(WDTO_4S); 
-  Serial.println("ready");
+          Serial.println("ready");
+
   
 }
 
@@ -30,45 +33,72 @@ bool normalMode = true;
 bool joystickThrustMode = false;
 bool settings = false;
 
+uint8_t current_controller_id;
+
+joyData data_joy;
+watchData data_watch;
+steerData data_steer;
+bool NewPacket = false;
 
 void loop() {
 
-  if (!getRadioData()){
-    wdt_reset();
-    return;};
+  NewPacket = getRadioData();
+
 //1 joy
 //2 watch
 //3 steer
+if (NewPacket){
   switch (packet.header.controllerID) {
     case 1: {
       if (packet.header.dataLen == sizeof(joyData)) {
-        joyData data;
-        memcpy(&data, packet.payload, sizeof(data));
-        joystickControllerProcedure(data);
+
+        memcpy(&data_joy, packet.payload, sizeof(data_joy));
+        current_controller_id = 1;
+        
+
       }
       break;
       }
        case 2: {
       if (packet.header.dataLen == sizeof(watchData)) {
-        watchData data;
-        memcpy(&data, packet.payload, sizeof(data));
-        watchControllerProcedure(data);
+        
+        memcpy(&data_watch, packet.payload, sizeof(data_watch));
+        current_controller_id = 2;
+        CLEnabled = true;
+
       }
       break;
       }
           case 3: {
       if (packet.header.dataLen == sizeof(steerData)) {
-        steerData data;
-        memcpy(&data, packet.payload, sizeof(data));
-        steerControllerProcedure(data);
+
+        memcpy(&data_steer, packet.payload, sizeof(data_steer));
+        current_controller_id = 3;
+        steerControllerProcedure();
       }
       break;
-      }
+      }}}
+    
+
+switch (current_controller_id){
+  case 1: {
+    
+    joystickControllerProcedure();
+    break;
     }
-
-
+      case 2: {
+    
+    watchControllerProcedure();
+    break;
+    }
+//    case 3: {
+//              steerControllerProcedure();
+//              break;}
+    
+    
+    
   
-  
+  }
 wdt_reset();
 }
 
@@ -92,12 +122,12 @@ wdt_reset();
 
 
 
-void joystickControllerProcedure(joyData data){
+void joystickControllerProcedure(){
 //      Serial.println(String(data.x) + "-x " + String(data.y) + "-y /toggle -" + String(data.sw)+ "/// pot  "+ String(data.pot) + "key: " + String(data.key));
-    
-  if (data.key){
 
-  switch (data.key){
+  if (data_joy.key){
+
+  switch (data_joy.key){
     case 'A':{
       joystickThrustMode =  !joystickThrustMode;
       normalMode = !normalMode;
@@ -123,7 +153,7 @@ void joystickControllerProcedure(joyData data){
       Serial.println(gpsTest());
       delay(1000);
       Serial.println("Radio test:");
-      Serial.println(String(data.x) + "-x " + String(data.y) + "-y /toggle -" + String(data.sw)+ "/// pot  "+ String(data.pot) + " key: " + String(data.key));
+      Serial.println(String(data_joy.x) + "-x " + String(data_joy.y) + "-y /toggle -" + String(data_joy.sw)+ "/// pot  "+ String(data_joy.pot) + " key: " + String(data_joy.key));
 //      delay(1000);
 //      Serial.println("Servo test:");
 //      //dokoncit servo movement bez servo lib
@@ -165,62 +195,78 @@ void joystickControllerProcedure(joyData data){
 
 }}
 
-if (data.sw){
+if (data_joy.sw){
     CLEnabled = !CLEnabled;
 }
 if (normalMode)
     {
-      throttle(data.pot);
-      continuousTurn(data.x);
+      throttle(data_joy.pot);
+      continuousTurn(data_joy.x);
       
 
       }
 if (joystickThrustMode){
-  throttleJoy(data.y);
-  continuousTurn(data.x);
+  throttleJoy(data_joy.y);
+  continuousTurn(data_joy.x);
   }
 
 
-data.key = 0;
-data.sw =0;}
+data_joy.key = 0;
+data_joy.sw = 0;}
 
-void watchControllerProcedure(watchData data){
-//        Serial.println(String(data.btn1) + " -btn1 " + String(data.btn2) + " -btn2 " + String(data.btn3) + " -btn3 ");
+void watchControllerProcedure(){
+//        Serial.println(String(data_watch.btn1) + " -btn1 " + String(data_watch.btn2) + " -btn2 " + String(data_watch.btn3) + " -btn3 ");
 
-        if (data.btn1){ // left
-          continuousTurn(300);
+        if (data_watch.btn1){ // left
+          continuousTurn(397);
           }
-        else if (data.btn2) { //right
+        else if (data_watch.btn2) { //right
           continuousTurn(800);
-          } 
-        if (data.btn3) { // turn on engine
-          if (!motorOn){
-            throttle(200);
-            motorOn = true;
-            }
-           else{
-            throttle(0);
-            motorOn = false;}
           }
 
-        if (data.btn1 == 0 and data.btn2 == 0 and data.btn3 == 0){
+        else {
             continuousTurn(503);
           }
 
+        if (data_watch.btn3){
+          motorOn = !motorOn;
+          throttle(motorOn ? 200 : 0);
+          data_watch.btn3 = 0;}
+
+
+
         
   }
-void steerControllerProcedure(steerData data){
+bool steerReverseEnabled = false;
+void steerControllerProcedure(){
 //        Serial.println(String(data.throttle) + "-throttle " + String(data.steerAngle) + "-s angle "  + String(data.btn1) + "-btn1 "  + String(data.btn2) + "-btn2 "  + String(data.btn3) + "-btn3 " );
 
 
-          turn(map(data.steerAngle,0,1023,705, 2347.5));
-          throttle(data.throttle);
+          turn(map(data_steer.steerAngle,0,1023,705, 2347.5));
 
 
-          if (data.btn1){ //CLock
+
+          if (data_steer.btn1){ //CLock
+            CLEnabled = false;
             }
-          if (data.btn2){} // throttle reverse on
-          if (data.btn3){} //
+          if (data_steer.btn2){
+            steerReverseEnabled = !steerReverseEnabled;
+            } // throttle reverse on
+
+          if (data_steer.btn3){
+            CLEnabled = true;
+            continuousTurn(503);
+            
+            } //
+
+            
+          if (steerReverseEnabled){
+            reverseThrottle(data_steer.throttle);
+          }
+          else{
+            throttle(data_steer.throttle);
+            }
+            
         
 
         

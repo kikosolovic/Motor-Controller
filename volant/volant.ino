@@ -14,7 +14,7 @@ const int steerPin= A1;
 const int btn1 = A2;
 const int btn2 = A3;
 const int btn3 = 0;
-
+bool transmit = true;
 struct steerData
 {
   uint16_t throttle;
@@ -40,7 +40,7 @@ struct Packet
 steerData data;
 steerData last_data;
 Packet packet;
-
+//const uint8_t sens = 15;
 
 
 void setup() {
@@ -58,27 +58,46 @@ radio.begin();
 
 }
 
+void sendData(){
+      packet.header.controllerID = 3;
+    packet.header.dataLen = sizeof(steerData);
+    
+      memset(packet.payload, 0, sizeof(packet.payload));
+      memcpy(packet.payload, &data, sizeof(data));
+    
+    radio.write(&packet, sizeof(packet));
+       
+  }
+
 void loop() {
 data.btn1 = (digitalRead(btn1) == LOW ? 1 : 0);
 data.btn2 = (digitalRead(btn2) == LOW ? 1 : 0);
 data.btn3 = (digitalRead(btn3) == LOW ? 1 : 0);
-
 data.throttle = constrain(map(analogRead(throttlePin),400, 800, 1023,0),0,1023);
+data.steerAngle = constrain(map(analogRead(steerPin),0,1023,1023,0),0,1023);
 
-data.steerAngle = analogRead(steerPin);
+
+if(data.btn1 == 1){
+
+  transmit = true;}
+if (data.btn3 == 1){
+  if (transmit){
+    
+    sendData(); 
+    }
+  transmit = false;}
 
 
-  if (memcmp(&data, &last_data, sizeof(steerData)) != 0) {
+
+//if (abs(data.throttle - last_data.throttle) <= sens) data.throttle = last_data.throttle;
+//if (abs(data.steerAngle - last_data.steerAngle) <= sens) data.steerAngle = last_data.steerAngle;
+
+if (transmit){
+
+  if (memcmp(&data, &last_data, sizeof(steerData)) != 0)  {
 
     
-packet.header.controllerID = 3;
-packet.header.dataLen = sizeof(steerData);
-
-  memset(packet.payload, 0, sizeof(packet.payload));
-  memcpy(packet.payload, &data, sizeof(data));
-
-radio.write(&packet, sizeof(packet));
-
+sendData();
     
 
 //    Serial.println(data.btn1 );
@@ -88,6 +107,7 @@ radio.write(&packet, sizeof(packet));
 //    Serial.println(data.steerAngle);
     
     last_data = data;
-  }
+  }}
+
 
 }

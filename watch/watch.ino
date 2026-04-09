@@ -57,7 +57,7 @@ void loop() {
     packet.header.controllerID = 2;
     packet.header.dataLen = sizeof(watchData);
 
-    
+//    Serial.println("s");
       memset(packet.payload, 0, sizeof(packet.payload));
   memcpy(packet.payload, &data, sizeof(data));
 radio.write(&packet, sizeof(packet));

@@ -35,6 +35,7 @@ if (nowSer - lastServoTurn >= servoInterval){
         delay(100);
         setTarget();
         locked = true;
+        
         }
     compassLock();
     }
