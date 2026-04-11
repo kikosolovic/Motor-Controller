@@ -251,9 +251,10 @@ bool steerReverseEnabled = false;
 void steerControllerProcedure(){
 //        Serial.println(String(data.throttle) + "-throttle " + String(data.steerAngle) + "-s angle "  + String(data.btn1) + "-btn1 "  + String(data.btn2) + "-btn2 "  + String(data.btn3) + "-btn3 " );
 
-
+          if (data_steer.steerAngle != 3000)  //CL mode
+          {
           turn(map(data_steer.steerAngle,0,1023,705, 2347.5));
-
+          }
 
 
           if (data_steer.btn1){ //CLock

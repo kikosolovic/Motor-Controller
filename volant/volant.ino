@@ -86,7 +86,10 @@ data.btn1 = readSingleButton(btn1);
 data.btn2 = readSingleButton(btn2);
 data.btn3 = readSingleButton(btn3);
 data.throttle = constrain(map(analogRead(throttlePin),400, 800, 1023,0),0,1023);
-data.steerAngle = constrain(map(analogRead(steerPin),0,1023,1023,0),0,1023);
+if (transmit){
+data.steerAngle = constrain(map(analogRead(steerPin),0,1023,1023,0),0,1023);}
+else{
+  data.steerAngle = 3000;}
 
 
 
@@ -94,7 +97,6 @@ if (data.btn3 == 1){
   transmit = !transmit;
 
     if (!transmit){
-      Serial.println(data.btn3);
       sendData();} 
     else{
       data.btn3 =2;}
@@ -106,7 +108,6 @@ if (data.btn3 == 1){
 //if (abs(data.throttle - last_data.throttle) <= sens) data.throttle = last_data.throttle;
 //if (abs(data.steerAngle - last_data.steerAngle) <= sens) data.steerAngle = last_data.steerAngle;
 
-if (transmit){
 
   if (memcmp(&data, &last_data, sizeof(steerData)) != 0)  {
 
@@ -121,7 +122,7 @@ if (transmit){
 //    Serial.println(data.steerAngle);
     
     last_data = data;
-  }}
+  }
 
 
 }
