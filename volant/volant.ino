@@ -94,6 +94,7 @@ if (data.btn3 == 1){
   transmit = !transmit;
 
     if (!transmit){
+      Serial.println(data.btn3);
       sendData();} 
     else{
       data.btn3 =2;}

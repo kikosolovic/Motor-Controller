@@ -74,6 +74,7 @@ if (NewPacket){
 
         memcpy(&data_steer, packet.payload, sizeof(data_steer));
         current_controller_id = 3;
+        locked = false;
         steerControllerProcedure();
       }
       break;
@@ -91,9 +92,9 @@ switch (current_controller_id){
     watchControllerProcedure();
     break;
     }
-//    case 3: {
-//              steerControllerProcedure();
-//              break;}
+    case 3: {
+              if (data_steer.btn3 == 1){continuousTurn(503);}
+              break;}
     
     
     

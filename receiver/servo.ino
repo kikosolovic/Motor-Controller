@@ -22,7 +22,7 @@ void turn(float x) {
 }
 
 
-bool locked = false;
+
 void continuousTurn(int x) {
 
   nowSer = millis();

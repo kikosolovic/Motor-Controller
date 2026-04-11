@@ -13,6 +13,7 @@ float current_angle;
 int whole_turn_angle = 114;
 int degPerTurn = 5;
 void center();
+bool locked = false;
 
 bool CLEnabled = false;
 unsigned long lastServoTurn = 0;
